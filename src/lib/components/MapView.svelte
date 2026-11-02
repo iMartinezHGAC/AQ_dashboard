@@ -23,35 +23,60 @@
 	const HOUSTON_CENTER: [number, number] = [-95.3698, 29.7604];
 	const HOUSTON_ZOOM = 9;
 
+	const SVG_NS = 'http://www.w3.org/2000/svg';
+
 	// Shape encodes data source, not pollutant capability: TCEQ (EPA/AirNow feed) = circle,
 	// Harris County Pollution Control (HCPCS feed) = triangle.
-	function shapeClipPath(agencyGroup: Monitor['agencyGroup']): string {
-		if (agencyGroup === 'HCPCS') return 'polygon(50% 0%, 0% 100%, 100% 100%)'; // triangle
-		return 'circle(50% at 50% 50%)'; // circle (EPA/TCEQ)
-	}
-
+	// Built as real SVG shapes rather than a CSS clip-path: clip-path cuts the
+	// element's already-painted border along the new outline, but the border was only
+	// ever drawn along the original (square) box edges, so a triangle's diagonal sides
+	// came out with no stroke at all. An SVG stroke traces the actual path, evenly.
 	function buildMarkerEl(monitor: Monitor, isSelected: boolean): HTMLDivElement {
 		const style = styleForAqi(dominantReading(monitor).aqi);
-		const el = document.createElement('div');
-		el.setAttribute('role', 'button');
-		el.setAttribute('aria-label', `${monitor.siteName}: ${style.category}`);
-		el.title = `${monitor.siteName} — ${style.category}`;
-		el.style.boxSizing = 'border-box';
-		el.style.width = isSelected ? '22px' : '16px';
-		el.style.height = isSelected ? '22px' : '16px';
-		el.style.backgroundColor = style.color;
-		el.style.clipPath = shapeClipPath(monitor.agencyGroup);
-		el.style.cursor = 'pointer';
-		// box-shadow is clipped away by clip-path, so the stroke has to be a border
-		// (clipped along with the shape) instead; filter isn't clipped, so it still
-		// gives a visible drop shadow for depth.
-		el.style.border = isSelected ? '4px solid #0b0b0b' : '2.5px solid #0b0b0b';
-		el.style.filter = 'drop-shadow(0 1px 2px rgba(0,0,0,0.45))';
-		el.addEventListener('click', (e) => {
+		const size = isSelected ? 22 : 16;
+		const strokeWidth = isSelected ? 4 : 2.5;
+		const inset = strokeWidth / 2;
+
+		const wrapper = document.createElement('div');
+		wrapper.setAttribute('role', 'button');
+		wrapper.setAttribute('aria-label', `${monitor.siteName}: ${style.category}`);
+		wrapper.title = `${monitor.siteName} — ${style.category}`;
+		wrapper.style.width = `${size}px`;
+		wrapper.style.height = `${size}px`;
+		wrapper.style.cursor = 'pointer';
+		wrapper.style.filter = 'drop-shadow(0 1px 2px rgba(0,0,0,0.45))';
+
+		const svg = document.createElementNS(SVG_NS, 'svg');
+		svg.setAttribute('width', String(size));
+		svg.setAttribute('height', String(size));
+		svg.setAttribute('viewBox', `0 0 ${size} ${size}`);
+
+		const shape = document.createElementNS(
+			SVG_NS,
+			monitor.agencyGroup === 'HCPCS' ? 'polygon' : 'circle'
+		);
+		if (monitor.agencyGroup === 'HCPCS') {
+			shape.setAttribute(
+				'points',
+				`${size / 2},${inset} ${inset},${size - inset} ${size - inset},${size - inset}`
+			);
+			shape.setAttribute('stroke-linejoin', 'round');
+		} else {
+			shape.setAttribute('cx', String(size / 2));
+			shape.setAttribute('cy', String(size / 2));
+			shape.setAttribute('r', String(size / 2 - inset));
+		}
+		shape.setAttribute('fill', style.color);
+		shape.setAttribute('stroke', '#0b0b0b');
+		shape.setAttribute('stroke-width', String(strokeWidth));
+		svg.appendChild(shape);
+		wrapper.appendChild(svg);
+
+		wrapper.addEventListener('click', (e) => {
 			e.stopPropagation();
 			onselect(monitor.id);
 		});
-		return el;
+		return wrapper;
 	}
 
 	function syncMarkers() {
