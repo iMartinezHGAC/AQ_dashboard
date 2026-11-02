@@ -20,10 +20,8 @@
 	let markers = new Map<string, Marker>();
 	let MaplibreCtor: typeof import('maplibre-gl') | undefined;
 
-	const HOUSTON_BOUNDS: [[number, number], [number, number]] = [
-		[-96.8727, 28.381],
-		[-94.3524, 31.0668]
-	];
+	const HOUSTON_CENTER: [number, number] = [-95.3698, 29.7604];
+	const HOUSTON_ZOOM = 9;
 
 	// Shape encodes data source, not pollutant capability: TCEQ (EPA/AirNow feed) = circle,
 	// Harris County Pollution Control (HCPCS feed) = triangle.
@@ -47,7 +45,7 @@
 		// box-shadow is clipped away by clip-path, so the stroke has to be a border
 		// (clipped along with the shape) instead; filter isn't clipped, so it still
 		// gives a visible drop shadow for depth.
-		el.style.border = isSelected ? '2.5px solid #0b0b0b' : '1.5px solid #0b0b0b';
+		el.style.border = isSelected ? '4px solid #0b0b0b' : '2.5px solid #0b0b0b';
 		el.style.filter = 'drop-shadow(0 1px 2px rgba(0,0,0,0.45))';
 		el.addEventListener('click', (e) => {
 			e.stopPropagation();
@@ -89,8 +87,8 @@
 		map = new MaplibreCtor.Map({
 			container,
 			style: 'https://tiles.openfreemap.org/styles/liberty',
-			bounds: HOUSTON_BOUNDS,
-			fitBoundsOptions: { padding: 30 }
+			center: HOUSTON_CENTER,
+			zoom: HOUSTON_ZOOM
 		});
 		map.addControl(new MaplibreCtor.NavigationControl(), 'top-right');
 		map.on('load', syncMarkers);
