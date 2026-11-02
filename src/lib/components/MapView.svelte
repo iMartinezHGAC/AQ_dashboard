@@ -34,7 +34,7 @@
 	function buildMarkerEl(monitor: Monitor, isSelected: boolean): HTMLDivElement {
 		const style = styleForAqi(dominantReading(monitor).aqi);
 		const size = isSelected ? 22 : 16;
-		const strokeWidth = isSelected ? 4 : 2.5;
+		const strokeWidth = isSelected ? 2.25 : 1.5;
 		const inset = strokeWidth / 2;
 
 		const wrapper = document.createElement('div');
