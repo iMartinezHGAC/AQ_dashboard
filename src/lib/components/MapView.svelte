@@ -38,14 +38,17 @@
 		el.setAttribute('role', 'button');
 		el.setAttribute('aria-label', `${monitor.siteName}: ${style.category}`);
 		el.title = `${monitor.siteName} — ${style.category}`;
+		el.style.boxSizing = 'border-box';
 		el.style.width = isSelected ? '22px' : '16px';
 		el.style.height = isSelected ? '22px' : '16px';
 		el.style.backgroundColor = style.color;
 		el.style.clipPath = shapeClipPath(monitor.agencyGroup);
 		el.style.cursor = 'pointer';
-		el.style.boxShadow = isSelected
-			? '0 0 0 2px #0b0b0b, 0 1px 3px rgba(0,0,0,0.4)'
-			: '0 1px 3px rgba(0,0,0,0.4)';
+		// box-shadow is clipped away by clip-path, so the stroke has to be a border
+		// (clipped along with the shape) instead; filter isn't clipped, so it still
+		// gives a visible drop shadow for depth.
+		el.style.border = isSelected ? '2.5px solid #0b0b0b' : '1.5px solid #0b0b0b';
+		el.style.filter = 'drop-shadow(0 1px 2px rgba(0,0,0,0.45))';
 		el.addEventListener('click', (e) => {
 			e.stopPropagation();
 			onselect(monitor.id);
