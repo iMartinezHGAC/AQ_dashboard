@@ -3,3 +3,13 @@ packages:
 engineStrict: true
 allowBuilds:
   esbuild: true
+  workerd: true
+minimumReleaseAgeExclude:
+  - "@cloudflare/workerd-darwin-64@1.20261102.1"
+  - "@cloudflare/workerd-darwin-arm64@1.20261102.1"
+  - "@cloudflare/workerd-linux-64@1.20261102.1"
+  - "@cloudflare/workerd-linux-arm64@1.20261102.1"
+  - "@cloudflare/workerd-windows-64@1.20261102.1"
+  - miniflare@5.20261102.0-beta
+  - workerd@1.20261102.1
+  - wrangler@4.156.2
