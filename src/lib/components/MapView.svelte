@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import 'maplibre-gl/dist/maplibre-gl.css';
+	import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?url';
 	import type { Map as MaplibreMap, Marker } from 'maplibre-gl';
 	import type { Monitor } from '#lib/arcgis.ts';
 	import { dominantReading, styleForAqi } from '#lib/aqi.ts';
@@ -109,6 +110,7 @@
 
 	onMount(async () => {
 		MaplibreCtor = await import('maplibre-gl');
+		MaplibreCtor.setWorkerUrl(maplibreWorkerUrl);
 		map = new MaplibreCtor.Map({
 			container,
 			style: 'https://tiles.openfreemap.org/styles/liberty',
